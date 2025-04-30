@@ -1,9 +1,16 @@
+# imports
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
+import os
 
 df = pd.read_csv('employees.csv')
+
+# find the size of dataset in bytes
+file_size = os.path.getsize('employees.csv')
+print(f"Size of dataset (bytes): {file_size}")
+
 # Existence assertions
 
 # count rows where 'name' field is empty
@@ -31,7 +38,6 @@ print(f"Number of records that violate birth-before hire assertion: {invalid_bir
 # Inter-record assertions
 
 # each employee has a manager that knows an employee
-
 known_employee_ids = set(df['eid'].dropna())
 invalid_managers = ((~df['reports_to'].isin(known_employee_ids)) & df['reports_to'].notnull()).sum()
 print(f"Number of records that violate employee/manager assertion: {invalid_managers}")
@@ -50,18 +56,10 @@ print(f"Number of cities that violate the summary assertion: {invalid_city_count
 
 salaries = df['salary'].dropna()
 
-# plot
-plt.figure(figsize=(10,6))
-count,bins,ignored = plt.hist(salaries,bins=30,density=True,alpha=0.6,color='skyblue',edgecolor='black')
-# Plot normal distribution over it
-mu, std = salaries.mean(), salaries.std()
-xmin, xmax = plt.xlim()
-x = np.linspace(xmin, xmax, 100)
-p = norm.pdf(x, mu, std)
-plt.plot(x, p, 'r', linewidth=2)
-
-plt.title('Histogram of Salaries with Normal Curve')
-plt.xlabel('Salary')
-plt.ylabel('Density')
+# create plot
+mu, std = norm.fit(salaries)
+plt.figure()
+plt.hist(salaries, bins=30, edgecolor='black', alpha=0.6, label='Salaries')
+plt.legend()
 plt.grid(True)
 plt.show()
